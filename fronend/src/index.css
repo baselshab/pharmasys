@@ -1,0 +1,240 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Pharmacy teal/emerald palette */
+    --background: 150 20% 98%;
+    --foreground: 170 30% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 170 30% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 170 30% 10%;
+
+    --primary: 168 55% 32%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 155 25% 93%;
+    --secondary-foreground: 168 55% 25%;
+
+    --muted: 150 15% 94%;
+    --muted-foreground: 170 10% 45%;
+
+    --accent: 43 96% 56%;
+    --accent-foreground: 30 50% 12%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 155 15% 88%;
+    --input: 155 15% 88%;
+    --ring: 168 55% 32%;
+
+    --radius: 0.625rem;
+
+    /* Pharmacy-specific tokens */
+    --success: 152 60% 40%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 30 50% 12%;
+    --info: 205 80% 50%;
+    --info-foreground: 0 0% 100%;
+
+    /* Sidebar */
+    --sidebar-background: 168 40% 15%;
+    --sidebar-foreground: 155 20% 85%;
+    --sidebar-primary: 43 96% 56%;
+    --sidebar-primary-foreground: 30 50% 12%;
+    --sidebar-accent: 168 35% 22%;
+    --sidebar-accent-foreground: 155 25% 95%;
+    --sidebar-border: 168 30% 20%;
+    --sidebar-ring: 43 96% 56%;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(168 55% 32%), hsl(155 50% 40%));
+    --gradient-accent: linear-gradient(135deg, hsl(43 96% 56%), hsl(38 92% 50%));
+    --gradient-sidebar: linear-gradient(180deg, hsl(168 40% 15%), hsl(170 35% 12%));
+
+    /* Shadows */
+    --shadow-sm: 0 1px 3px hsl(168 30% 20% / 0.06);
+    --shadow-md: 0 4px 12px hsl(168 30% 20% / 0.08);
+    --shadow-lg: 0 10px 30px hsl(168 30% 20% / 0.12);
+    --shadow-card: 0 2px 8px hsl(168 30% 20% / 0.06), 0 0 0 1px hsl(155 15% 88% / 0.5);
+  }
+
+  .dark {
+    --background: 170 25% 6%;
+    --foreground: 155 15% 92%;
+
+    --card: 170 20% 10%;
+    --card-foreground: 155 15% 92%;
+
+    --popover: 170 20% 10%;
+    --popover-foreground: 155 15% 92%;
+
+    --primary: 163 50% 45%;
+    --primary-foreground: 170 30% 5%;
+
+    --secondary: 168 25% 16%;
+    --secondary-foreground: 155 20% 85%;
+
+    --muted: 168 20% 14%;
+    --muted-foreground: 155 12% 55%;
+
+    --accent: 43 90% 50%;
+    --accent-foreground: 30 50% 8%;
+
+    --destructive: 0 62% 45%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 168 20% 18%;
+    --input: 168 20% 18%;
+    --ring: 163 50% 45%;
+
+    --success: 152 55% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 90% 50%;
+    --warning-foreground: 30 50% 8%;
+    --info: 205 75% 55%;
+    --info-foreground: 0 0% 100%;
+
+    --sidebar-background: 170 30% 6%;
+    --sidebar-foreground: 155 15% 80%;
+    --sidebar-primary: 43 90% 50%;
+    --sidebar-primary-foreground: 30 50% 8%;
+    --sidebar-accent: 168 25% 14%;
+    --sidebar-accent-foreground: 155 20% 90%;
+    --sidebar-border: 168 20% 12%;
+    --sidebar-ring: 43 90% 50%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(163 50% 45%), hsl(152 55% 45%));
+    --gradient-accent: linear-gradient(135deg, hsl(43 90% 50%), hsl(38 88% 45%));
+    --gradient-sidebar: linear-gradient(180deg, hsl(170 30% 6%), hsl(170 25% 4%));
+
+    --shadow-sm: 0 1px 3px hsl(0 0% 0% / 0.2);
+    --shadow-md: 0 4px 12px hsl(0 0% 0% / 0.3);
+    --shadow-lg: 0 10px 30px hsl(0 0% 0% / 0.4);
+    --shadow-card: 0 2px 8px hsl(0 0% 0% / 0.2), 0 0 0 1px hsl(168 20% 18% / 0.5);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  :root body {
+    font-feature-settings: "cv11", "ss01";
+  }
+
+  [dir="rtl"] body {
+    font-feature-settings: normal;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    @apply tracking-tight;
+  }
+}
+
+@layer components {
+  .card-pharma {
+    @apply bg-card rounded-xl border;
+    box-shadow: var(--shadow-card);
+  }
+
+  .kpi-card {
+    @apply card-pharma p-5 transition-all duration-200;
+  }
+
+  .kpi-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+  }
+
+  .sync-indicator {
+    @apply inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full;
+  }
+
+  .sync-online {
+    @apply sync-indicator bg-success/10 text-success;
+  }
+
+  .sync-offline {
+    @apply sync-indicator bg-muted text-muted-foreground;
+  }
+
+  .sync-syncing {
+    @apply sync-indicator bg-info/10 text-info;
+  }
+
+  .page-header {
+    @apply flex items-center justify-between pb-6;
+  }
+
+  .page-title {
+    @apply text-2xl font-bold text-foreground;
+  }
+
+  .page-subtitle {
+    @apply text-sm text-muted-foreground mt-0.5;
+  }
+}
+
+@layer utilities {
+  .gradient-primary {
+    background: var(--gradient-primary);
+  }
+
+  .gradient-accent {
+    background: var(--gradient-accent);
+  }
+
+  .shadow-pharma-sm {
+    box-shadow: var(--shadow-sm);
+  }
+
+  .shadow-pharma-md {
+    box-shadow: var(--shadow-md);
+  }
+
+  .shadow-pharma-lg {
+    box-shadow: var(--shadow-lg);
+  }
+}
+
+/* RTL / Arabic font support */
+[dir="rtl"],
+[dir="rtl"] * {
+  font-family: 'Noto Sans Arabic', 'Segoe UI', 'Tahoma', 'Arial', sans-serif !important;
+  letter-spacing: normal !important;
+  word-spacing: normal !important;
+}
+
+[dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3, [dir="rtl"] h4,
+[dir="rtl"] .font-display {
+  font-family: 'Noto Sans Arabic', 'Segoe UI', sans-serif !important;
+}
+
+[dir="rtl"] .font-mono {
+  font-family: 'Noto Sans Arabic', monospace !important;
+}
+
+[dir="rtl"] .tracking-tight,
+[dir="rtl"] .tracking-wider,
+[dir="rtl"] .tracking-widest {
+  letter-spacing: normal !important;
+}
+
+[dir="rtl"] .uppercase {
+  text-transform: none;
+}
