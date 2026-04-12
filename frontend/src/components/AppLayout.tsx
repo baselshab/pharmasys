@@ -7,6 +7,7 @@ import { HeaderProfileMenu } from "@/components/HeaderProfileMenu";
 import NotificationsDropdown from '@/components/layouts/NotificationsDropdown';
 import GlobalSearch from "./common/GlobalSearch";
 import LanguageToggle from "./common/LanguageToggle";
+import { SyncStatusBadge } from "./SyncStatus";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -31,7 +32,10 @@ export function AppLayout({ children, title, subtitle, actions }: AppLayoutProps
                 <div>
                   <h1 className="text-sm font-semibold text-foreground">{title}</h1>
                   {subtitle && <p className="text-[11px] text-muted-foreground">{subtitle}</p>}
+                        <SyncStatusBadge /> {/* ← أضف هذا */}
+                
                 </div>
+                
               )}
             </div>
             <div className="flex items-center gap-2">
