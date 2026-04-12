@@ -1,0 +1,392 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Pharmacy {
+  id        String   @id @default("ph-001")
+  name      String
+  address   String?
+  phone     String?
+  licenseNo String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users           User[]
+  products        Product[]
+  sales           Sale[]
+  customers       Customer[]
+  suppliers       Supplier[]
+  purchaseOrders  PurchaseOrder[]
+  branches        Branch[]
+}
+
+model User {
+  id          String   @id
+  pharmacyId  String
+  fullName    String
+  email       String   @unique
+  phone       String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  pharmacy    Pharmacy @relation(fields: [pharmacyId], references: [id])
+  userRoles   UserRole[]
+  sales       Sale[]
+  purchaseOrders PurchaseOrder[]
+  stockAdjustments StockAdjustment[]
+  attendances Attendance[]
+  branchUsers BranchUser[]
+
+  @@index([pharmacyId])
+  @@index([email])
+}
+
+model UserRole {
+  id     String @id
+  userId String
+  role   String // admin, pharmacist, cashier, manager
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@unique([userId, role])
+}
+
+model Category {
+  id        String   @id
+  name      String
+  parentId  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products Product[]
+
+  @@index([parentId])
+}
+
+model Product {
+  id                   String   @id
+  pharmacyId           String
+  categoryId           String?
+  name                 String
+  genericName          String?
+  barcode              String?  @unique
+  unit                 String   @default("piece")
+  sellPrice            Float
+  costPrice            Float    @default(0)
+  reorderLevel        Int      @default(10)
+  maxStock             Int      @default(1000)
+  isActive             Boolean  @default(true)
+  requiresPrescription Boolean  @default(false)
+  dosageForm           String?
+  branchId             String?
+  supplierId           String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  pharmacy             Pharmacy @relation(fields: [pharmacyId], references: [id])
+  category             Category? @relation(fields: [categoryId], references: [id])
+  branch               Branch?  @relation(fields: [branchId], references: [id])
+  supplier             Supplier? @relation(fields: [supplierId], references: [id])
+  batches              ProductBatch[]
+  saleItems            SaleItem[]
+  stockAdjustments     StockAdjustment[]
+  purchaseOrderItems PurchaseOrderItem[]
+
+  @@index([pharmacyId])
+  @@index([categoryId])
+  @@index([barcode])
+  @@index([branchId])
+}
+
+model ProductBatch {
+  id              String   @id
+  productId      String
+  batchNumber    String
+  quantity       Int      @default(0)
+  costPrice      Float
+  manufactureDate DateTime?
+  expiryDate     DateTime
+  receivedDate   DateTime @default(now())
+  supplierId     String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  product        Product  @relation(fields: [productId], references: [id])
+  supplier       Supplier? @relation(fields: [supplierId], references: [id])
+  saleItems      SaleItem[]
+
+  @@index([productId])
+  @@index([expiryDate])
+}
+
+model StockAdjustment {
+  id              String   @id
+  productId      String
+  batchId        String?
+  userId         String
+  adjustmentType String   // increase, decrease, damage, expired, correction
+  quantity       Int
+  reason         String?
+  createdAt      DateTime @default(now())
+  product        Product  @relation(fields: [productId], references: [id])
+  user           User     @relation(fields: [userId], references: [id])
+
+  @@index([productId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model Supplier {
+  id            String   @id
+  pharmacyId    String
+  name          String
+  contactPerson String?
+  phone         String?
+  email         String?
+  address       String?
+  paymentTerms  String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  pharmacy      Pharmacy @relation(fields: [pharmacyId], references: [id])
+  purchaseOrders PurchaseOrder[]
+  products      Product[]
+  batches      ProductBatch[]
+
+  @@index([pharmacyId])
+}
+
+model PurchaseOrder {
+  id            String   @id
+  pharmacyId    String
+  supplierId    String
+  userId        String
+  orderNumber   String   @unique
+  status       String   @default("draft") // draft, submitted, partial, received, cancelled
+  totalAmount  Float     @default(0)
+  notes        String?
+  orderDate    DateTime @default(now())
+  expectedDate DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  pharmacy     Pharmacy @relation(fields: [pharmacyId], references: [id])
+  supplier     Supplier @relation(fields: [supplierId], references: [id])
+  user         User     @relation(fields: [userId], references: [id])
+  items        PurchaseOrderItem[]
+
+  @@index([pharmacyId])
+  @@index([supplierId])
+  @@index([orderDate])
+}
+
+model PurchaseOrderItem {
+  id                String         @id
+  purchaseOrderId   String
+  productId         String
+  quantityOrdered   Int
+  quantityReceived  Int            @default(0)
+  unitCost          Float
+  totalCost         Float
+  createdAt         DateTime       @default(now())
+  purchaseOrder    PurchaseOrder  @relation(fields: [purchaseOrderId], references: [id])
+  product          Product        @relation(fields: [productId], references: [id])
+
+  @@index([purchaseOrderId])
+  @@index([productId])
+}
+
+model Customer {
+  id            String   @id
+  pharmacyId    String
+  name          String
+  phone         String?
+  email         String?
+  address       String?
+  loyaltyPoints Int      @default(0)
+  creditLimit  Float    @default(0)
+  creditBalance Float   @default(0)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  pharmacy      Pharmacy @relation(fields: [pharmacyId], references: [id])
+  sales         Sale[]
+  debts         CustomerDebt[]
+
+  @@index([pharmacyId])
+}
+
+model Sale {
+  id           String   @id
+  pharmacyId  String
+  customerId  String?
+  userId      String
+  saleNumber  String   @unique
+  status     String   @default("completed") // completed, refunded, partial_refund, on_hold
+  subtotal    Float
+  discountAmount Float @default(0)
+  taxAmount   Float    @default(0)
+  totalAmount Float
+  paymentMethod String // cash, card, mobile, credit, split
+  amountPaid Float
+  changeAmount Float  @default(0)
+  notes       String?
+  branchId    String?
+  saleDate    DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  pharmacy    Pharmacy  @relation(fields: [pharmacyId], references: [id])
+  customer    Customer?  @relation(fields: [customerId], references: [id])
+  user        User       @relation(fields: [userId], references: [id])
+  branch      Branch?    @relation(fields: [branchId], references: [id])
+  items       SaleItem[]
+  payments   SalePayment[]
+  debts       CustomerDebt[]
+
+  @@index([pharmacyId])
+  @@index([saleDate])
+  @@index([customerId])
+  @@index([branchId])
+}
+
+model SaleItem {
+  id           String   @id
+  saleId       String
+  productId    String
+  batchId     String?
+  quantity     Int
+  unitPrice    Float
+  discount     Float    @default(0)
+  totalPrice   Float
+  createdAt    DateTime @default(now())
+  sale         Sale     @relation(fields: [saleId], references: [id])
+  product      Product  @relation(fields: [productId], references: [id])
+  batch        ProductBatch? @relation(fields: [batchId], references: [id])
+
+  @@index([saleId])
+  @@index([productId])
+}
+
+model SalePayment {
+  id             String   @id
+  saleId         String
+  paymentMethod String
+  amount         Float
+  reference     String?
+  createdAt      DateTime @default(now())
+  sale           Sale     @relation(fields: [saleId], references: [id])
+
+  @@index([saleId])
+}
+
+model CustomerDebt {
+  id          String   @id
+  customerId  String
+  saleId      String?
+  amount      Float
+  paidAmount  Float    @default(0)
+  status      String   @default("unpaid") // unpaid, partial, paid
+  notes       String?
+  dueDate     DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  customer    Customer  @relation(fields: [customerId], references: [id])
+  sale        Sale?     @relation(fields: [saleId], references: [id])
+
+  @@index([customerId])
+  @@index([status])
+}
+
+model Branch {
+  id          String   @id
+  pharmacyId  String   @default("ph-001")
+  name        String
+  address     String?
+  phone       String?
+  managerName String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  pharmacy    Pharmacy  @relation(fields: [pharmacyId], references: [id])
+  products    Product[]
+  sales       Sale[]
+  users       BranchUser[]
+  attendances Attendance[]
+
+  @@index([pharmacyId])
+}
+
+model BranchUser {
+  id        String   @id
+  branchId  String
+  userId    String
+  role      String   @default("cashier") // admin, manager, pharmacist, cashier
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  branch    Branch   @relation(fields: [branchId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([branchId, userId])
+  @@index([branchId])
+  @@index([userId])
+}
+
+model RolePermission {
+  id          String @id
+  role        String
+  permission  String
+
+  @@unique([role, permission])
+  @@index([role])
+}
+
+model Attendance {
+  id        String    @id
+  userId   String
+  branchId String?
+  clockIn  DateTime
+  clockOut DateTime?
+  status   String    @default("present") // present, late, absent
+  notes    String?
+  createdAt DateTime @default(now())
+  user     User      @relation(fields: [userId], references: [id])
+  branch   Branch?  @relation(fields: [branchId], references: [id])
+
+  @@index([userId])
+  @@index([clockIn])
+}
+
+model AuditLog {
+  id         String   @id
+  userId     String?
+  userName   String?
+  action    String
+  tableName String?
+  recordId  String?
+  details   String?
+  branchId  String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+model SyncLog {
+  id         String   @id
+  tableName  String
+  recordId   String
+  operation String // INSERT, UPDATE, DELETE
+  payload   String
+  synced    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  syncedAt  DateTime?
+
+  @@index([synced])
+  @@index([tableName])
+}
+
+model SyncMeta {
+  key        String   @id
+  value     String
+  updatedAt DateTime @default(now())
+}

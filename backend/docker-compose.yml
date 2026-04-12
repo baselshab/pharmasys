@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: pharmasys-db
+    environment:
+      POSTGRES_USER: pharmasys
+      POSTGRES_PASSWORD: pharmasys123
+      POSTGRES_DB: pharmasys
+    ports:
+      - "5432:5432"
+    network_mode: "host"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pharmasys"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
